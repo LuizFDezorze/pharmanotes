@@ -126,6 +126,11 @@ function NotesTab() {
     setNotes((prev) => prev.filter((n) => n.id !== noteId))
   }
 
+  async function unpublishNote(noteId) {
+    await supabase.from('notes').update({ status: 'draft' }).eq('id', noteId)
+    setNotes((prev) => prev.filter((n) => n.id !== noteId))
+  }
+
   async function deleteNote(noteId) {
     if (!confirm('Excluir esta nota permanentemente?')) return
     await supabase.from('notes').delete().eq('id', noteId)
@@ -189,6 +194,14 @@ function NotesTab() {
                       className="text-xs font-medium bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition-colors"
                     >
                       Publicar
+                    </button>
+                  )}
+                  {note.status === 'published' && (
+                    <button
+                      onClick={() => unpublishNote(note.id)}
+                      className="text-xs font-medium bg-white text-yellow-700 border border-yellow-200 px-3 py-1.5 rounded-lg hover:bg-yellow-50 transition-colors"
+                    >
+                      Despublicar
                     </button>
                   )}
                   <button
