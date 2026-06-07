@@ -64,9 +64,30 @@ export function AuthProvider({ children }) {
     setProfile(null)
   }
 
+  async function sendPasswordReset(email) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://pharmanotes.vercel.app/reset-password',
+    })
+    return error
+  }
+
+  async function updatePassword(password) {
+    const { error } = await supabase.auth.updateUser({ password })
+    return error
+  }
+
   return (
     <AuthContext.Provider
-      value={{ user, profile, loading, signUp, signIn, signOut }}
+      value={{
+        user,
+        profile,
+        loading,
+        signUp,
+        signIn,
+        signOut,
+        sendPasswordReset,
+        updatePassword,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -4,12 +4,15 @@ import { normalizeNote } from '../lib/utils'
 import NoteCard from '../components/notes/NoteCard'
 import CategoryFilter from '../components/notes/CategoryFilter'
 
+const PAGE_SIZE = 12
+
 export default function PublicFeed() {
   const [notes, setNotes] = useState([])
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     async function load() {
@@ -51,6 +54,9 @@ export default function PublicFeed() {
     return result
   }, [notes, categories, selectedCategory, search])
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 w-full">
       <div className="mb-8">
@@ -66,14 +72,20 @@ export default function PublicFeed() {
         <CategoryFilter
           categories={categories}
           selected={selectedCategory}
-          onChange={setSelectedCategory}
+          onChange={(catId) => {
+            setSelectedCategory(catId)
+            setPage(1)
+          }}
         />
         <div className="sm:ml-auto">
           <input
             type="search"
             placeholder="Buscar notas..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setPage(1)
+            }}
             className="w-full sm:w-56 text-sm border border-gray-200 rounded-lg px-3 py-1.5 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
           />
         </div>
@@ -84,11 +96,35 @@ export default function PublicFeed() {
           <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
         </div>
       ) : filtered.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((note) => (
-            <NoteCard key={note.id} note={note} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {paginated.map((note) => (
+              <NoteCard key={note.id} note={note} />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-4 mt-8">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="text-sm font-medium text-gray-600 px-4 py-2 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                ← Anterior
+              </button>
+              <span className="text-sm text-gray-400">
+                Página {page} de {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="text-sm font-medium text-gray-600 px-4 py-2 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Próximo →
+              </button>
+            </div>
+          )}
+        </>
       ) : (
         <div className="text-center py-20 text-gray-400 text-sm">
           Nenhuma nota encontrada.

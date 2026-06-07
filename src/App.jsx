@@ -6,6 +6,8 @@ import PublicFeed from './pages/PublicFeed'
 import NotePage from './pages/NotePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import CollaboratorDashboard from './pages/collaborator/CollaboratorDashboard'
 import AdminDashboard from './pages/admin/AdminDashboard'
 
@@ -20,6 +22,8 @@ export default function App() {
             <Route path="/notes/:id" element={<NotePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route
               path="/dashboard"
               element={
