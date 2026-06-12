@@ -69,9 +69,16 @@ export default function NotePage() {
           {note.title}
         </h1>
 
-        <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap mb-6">
-          {note.content}
-        </p>
+        {note.content.startsWith('<') ? (
+          <div
+            className="prose prose-sm max-w-none text-gray-600 mb-6"
+            dangerouslySetInnerHTML={{ __html: note.content }}
+          />
+        ) : (
+          <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap mb-6">
+            {note.content}
+          </p>
+        )}
 
         {note.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-6">

@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { formatDate } from '../../lib/utils'
 import { categoryColors } from '../../data/mock'
+import RichTextEditor from '../../components/editor/RichTextEditor'
 
 const INPUT =
   'text-sm border border-gray-200 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent w-full'
@@ -17,9 +18,11 @@ function NoteEditor({ note, categories, onSaved, onCancel }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const isContentEmpty = !content || content === '<p></p>'
+
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!title.trim() || !content.trim()) {
+    if (!title.trim() || isContentEmpty) {
       setError('Título e conteúdo são obrigatórios.')
       return
     }
@@ -33,7 +36,7 @@ function NoteEditor({ note, categories, onSaved, onCancel }) {
         .update({
           title: title.trim(),
           category_id: categoryId,
-          content: content.trim(),
+          content,
         })
         .eq('id', note.id)
 
@@ -50,7 +53,7 @@ function NoteEditor({ note, categories, onSaved, onCancel }) {
         .insert({
           title: title.trim(),
           category_id: categoryId,
-          content: content.trim(),
+          content,
           author_id: user.id,
         })
         .select()
@@ -131,14 +134,7 @@ function NoteEditor({ note, categories, onSaved, onCancel }) {
 
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-medium text-gray-700">Conteúdo</label>
-        <textarea
-          required
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows={6}
-          placeholder="Escreva a nota clínica aqui..."
-          className={INPUT + ' resize-none'}
-        />
+        <RichTextEditor content={content} onChange={setContent} />
       </div>
 
       <div className="flex flex-col gap-1.5">
