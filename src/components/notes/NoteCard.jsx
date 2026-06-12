@@ -24,9 +24,16 @@ export default function NoteCard({ note }) {
         <h2 className="text-sm font-medium text-gray-900 leading-snug">
           {note.title}
         </h2>
-        <p className="text-sm text-gray-500 leading-relaxed line-clamp-3">
-          {note.content}
-        </p>
+        {note.content.startsWith('<') ? (
+          <div
+            className="text-sm text-gray-500 leading-relaxed line-clamp-3 [&_*]:!m-0 [&_*]:!p-0"
+            dangerouslySetInnerHTML={{ __html: note.content }}
+          />
+        ) : (
+          <p className="text-sm text-gray-500 leading-relaxed line-clamp-3">
+            {note.content}
+          </p>
+        )}
       </div>
 
       {note.tags?.length > 0 && (
