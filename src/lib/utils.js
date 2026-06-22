@@ -28,6 +28,11 @@ export function avatarColor(name = '') {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
 }
 
+export function stripHtml(html, maxLength = 160) {
+  const text = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+  return text.length > maxLength ? text.slice(0, maxLength - 1) + '…' : text
+}
+
 export function normalizeNote(n) {
   return {
     id: n.id,

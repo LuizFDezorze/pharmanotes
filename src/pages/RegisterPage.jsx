@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import SEO from '../components/SEO'
 
 export default function RegisterPage() {
   const { signUp } = useAuth()
@@ -57,6 +58,7 @@ export default function RegisterPage() {
 
   return (
     <main className="flex-1 flex items-center justify-center px-4 py-12">
+      <SEO title="Criar conta" description="Crie sua conta no PharmaNotes e colabore com notas clínicas e referências farmacêuticas." path="/register" />
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <span className="text-4xl">💊</span>

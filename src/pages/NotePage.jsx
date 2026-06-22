@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import DOMPurify from 'dompurify'
 import { supabase } from '../lib/supabase'
-import { normalizeNote, formatDate, initials, avatarColor } from '../lib/utils'
+import { normalizeNote, formatDate, initials, avatarColor, stripHtml } from '../lib/utils'
 import { categoryColors } from '../data/mock'
+import SEO from '../components/SEO'
 
 export default function NotePage() {
   const { id } = useParams()
@@ -49,6 +50,11 @@ export default function NotePage() {
 
   return (
     <main className="max-w-2xl mx-auto px-4 sm:px-6 py-10 w-full">
+      <SEO
+        title={note.title}
+        description={stripHtml(note.content)}
+        path={`/notes/${note.id}`}
+      />
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-8"

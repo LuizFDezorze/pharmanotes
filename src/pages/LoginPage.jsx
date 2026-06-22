@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import SEO from '../components/SEO'
 
 export default function LoginPage() {
   const { signIn } = useAuth()
@@ -30,6 +31,7 @@ export default function LoginPage() {
 
   return (
     <main className="flex-1 flex items-center justify-center px-4 py-12">
+      <SEO title="Entrar" path="/login" />
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <span className="text-4xl">💊</span>

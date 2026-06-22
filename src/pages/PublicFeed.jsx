@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 import { normalizeNote } from '../lib/utils'
+import SEO from '../components/SEO'
 import NoteCard from '../components/notes/NoteCard'
 import CategoryFilter from '../components/notes/CategoryFilter'
 
@@ -59,6 +60,7 @@ export default function PublicFeed() {
 
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 w-full">
+      <SEO />
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-gray-900 mb-1">
           Notas Clínicas
