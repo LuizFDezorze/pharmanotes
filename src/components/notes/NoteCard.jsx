@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import DOMPurify from 'dompurify'
 import { categoryColors } from '../../data/mock'
 import { formatDate, initials, avatarColor } from '../../lib/utils'
 
@@ -27,7 +28,7 @@ export default function NoteCard({ note }) {
         {note.content.startsWith('<') ? (
           <div
             className="text-sm text-gray-500 leading-relaxed line-clamp-3 [&_*]:!m-0 [&_*]:!p-0"
-            dangerouslySetInnerHTML={{ __html: note.content }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note.content) }}
           />
         ) : (
           <p className="text-sm text-gray-500 leading-relaxed line-clamp-3">

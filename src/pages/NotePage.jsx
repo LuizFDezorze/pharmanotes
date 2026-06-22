@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import DOMPurify from 'dompurify'
 import { supabase } from '../lib/supabase'
 import { normalizeNote, formatDate, initials, avatarColor } from '../lib/utils'
 import { categoryColors } from '../data/mock'
@@ -72,7 +73,7 @@ export default function NotePage() {
         {note.content.startsWith('<') ? (
           <div
             className="prose prose-sm max-w-none text-gray-600 mb-6"
-            dangerouslySetInnerHTML={{ __html: note.content }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note.content) }}
           />
         ) : (
           <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap mb-6">
