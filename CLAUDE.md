@@ -42,12 +42,12 @@ src/
     ├── PublicFeed.jsx             # / — feed com filtro, busca, paginação
     ├── NotePage.jsx               # /notes/:id
     ├── ProfilePage.jsx            # /profile/:id — perfil público do colaborador
-    ├── AboutPage.jsx              # /about
+    ├── AboutPage.jsx              # /about — conteúdo do banco com fallback estático
     ├── LoginPage.jsx              # /login
     ├── RegisterPage.jsx           # /register
     ├── ForgotPasswordPage.jsx     # /forgot-password
     ├── ResetPasswordPage.jsx      # /reset-password
-    ├── admin/AdminDashboard.jsx   # /admin — gestão de notas e usuários
+    ├── admin/AdminDashboard.jsx   # /admin — gestão de notas, usuários e página Sobre
     └── collaborator/
         └── CollaboratorDashboard.jsx  # /dashboard — minhas notas, bio, favoritos
 ```
@@ -60,6 +60,7 @@ src/
 - **tags** — id, name
 - **note_tags** — note_id, tag_id (junction)
 - **favorites** — user_id, note_id, created_at
+- **site_settings** — key (text PK), value (text) — conteúdo editável (ex: página Sobre)
 
 ### RLS
 
@@ -67,6 +68,7 @@ src/
 - Notas publicadas: leitura pública; drafts: só o autor
 - Favoritos: cada usuário gerencia os seus
 - Perfil: leitura pública para usuários ativos; self-update da bio
+- site_settings: leitura pública, escrita apenas admin
 
 ### Migrations (SQL files na raiz)
 
@@ -75,6 +77,7 @@ src/
 - `schema_patch.sql` — patches incrementais
 - `schema_favorites.sql` — tabela favorites
 - `schema_profile.sql` — coluna bio + policies de perfil
+- `schema_site_settings.sql` — tabela site_settings (página Sobre editável)
 
 ## Segurança
 
