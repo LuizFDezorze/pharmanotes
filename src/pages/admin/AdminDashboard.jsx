@@ -188,6 +188,67 @@ function AdminNoteEditor({ note, categories, authorId, onSaved, onCancel }) {
   )
 }
 
+function AboutTab() {
+  const [content, setContent] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'about_content')
+      .single()
+      .then(({ data }) => {
+        setContent(data?.value ?? '')
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+
+  async function handleSave() {
+    setSaving(true)
+    setSaved(false)
+    await supabase
+      .from('site_settings')
+      .update({ value: content })
+      .eq('key', 'about_content')
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-16">
+        <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="text-sm text-gray-500">
+        Edite o conteúdo da página Sobre. Deixe vazio para usar o texto padrão.
+      </p>
+      <RichTextEditor content={content} onChange={setContent} />
+      <div className="flex items-center gap-3">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+        >
+          {saving ? 'Salvando...' : 'Salvar'}
+        </button>
+        {saved && (
+          <span className="text-sm text-green-600">Salvo com sucesso!</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function UsersTab() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -480,9 +541,14 @@ export default function AdminDashboard() {
         <TabButton active={tab === 'notes'} onClick={() => setTab('notes')}>
           Notas
         </TabButton>
+        <TabButton active={tab === 'about'} onClick={() => setTab('about')}>
+          Sobre
+        </TabButton>
       </div>
 
-      {tab === 'users' ? <UsersTab /> : <NotesTab />}
+      {tab === 'users' && <UsersTab />}
+      {tab === 'notes' && <NotesTab />}
+      {tab === 'about' && <AboutTab />}
     </main>
   )
 }
