@@ -11,6 +11,7 @@ import RegisterPage from './pages/RegisterPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import CollaboratorDashboard from './pages/collaborator/CollaboratorDashboard'
+import ProfilePage from './pages/ProfilePage'
 import AdminDashboard from './pages/admin/AdminDashboard'
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<PublicFeed />} />
             <Route path="/notes/:id" element={<NotePage />} />
+            <Route path="/profile/:id" element={<ProfilePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />

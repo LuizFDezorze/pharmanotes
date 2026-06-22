@@ -42,6 +42,7 @@ export function normalizeNote(n) {
     date: n.created_at,
     category: n.categories?.name ?? 'Geral',
     author: {
+      id: n.users?.id,
       name: n.users?.name ?? 'Autor',
       role: n.users?.role ?? 'collaborator',
     },

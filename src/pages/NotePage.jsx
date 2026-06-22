@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import DOMPurify from 'dompurify'
 import { supabase } from '../lib/supabase'
 import { normalizeNote, formatDate, initials, avatarColor, stripHtml } from '../lib/utils'
@@ -115,17 +115,22 @@ export default function NotePage() {
         )}
 
         <div className="flex items-center gap-2 pt-5 border-t border-gray-100">
-          <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0 ${avatarColor(note.author.name)}`}
+          <Link
+            to={`/profile/${note.author.id}`}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
-            {initials(note.author.name)}
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-gray-800">
-              {note.author.name}
-            </span>
-            <span className="text-xs text-gray-400">Autor</span>
-          </div>
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0 ${avatarColor(note.author.name)}`}
+            >
+              {initials(note.author.name)}
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-800">
+                {note.author.name}
+              </span>
+              <span className="text-xs text-gray-400">Autor</span>
+            </div>
+          </Link>
           {note.author.role === 'admin' && (
             <span className="ml-auto text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
               admin

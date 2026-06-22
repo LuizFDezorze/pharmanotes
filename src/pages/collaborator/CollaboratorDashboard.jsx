@@ -3,10 +3,75 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useFavorites } from '../../hooks/useFavorites'
-import { formatDate, normalizeNote } from '../../lib/utils'
+import { formatDate, normalizeNote, initials, avatarColor } from '../../lib/utils'
 import { categoryColors } from '../../data/mock'
 import NoteCard from '../../components/notes/NoteCard'
 import RichTextEditor from '../../components/editor/RichTextEditor'
+
+function ProfileCard({ profile: initial }) {
+  const [bio, setBio] = useState(initial?.bio ?? '')
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  async function handleSave() {
+    setSaving(true)
+    await supabase.from('users').update({ bio }).eq('id', initial.id)
+    setSaving(false)
+    setEditing(false)
+  }
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-5 mb-8 flex items-start gap-4">
+      <div
+        className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-base font-semibold shrink-0 ${avatarColor(initial.name)}`}
+      >
+        {initials(initial.name)}
+      </div>
+      <div className="flex-1 min-w-0">
+        <h2 className="text-base font-medium text-gray-900">{initial.name}</h2>
+        {editing ? (
+          <div className="mt-2 flex flex-col gap-2">
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              maxLength={200}
+              rows={2}
+              placeholder="Escreva uma breve bio (opcional, máx. 200 caracteres)"
+              className="text-sm border border-gray-200 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent w-full resize-none"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="text-xs font-medium bg-gray-900 text-white px-3 py-1.5 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+              >
+                {saving ? 'Salvando...' : 'Salvar'}
+              </button>
+              <button
+                onClick={() => { setBio(initial?.bio ?? ''); setEditing(false) }}
+                className="text-xs text-gray-500 px-3 py-1.5 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-sm text-gray-500">
+              {bio || 'Sem bio ainda.'}
+            </p>
+            <button
+              onClick={() => setEditing(true)}
+              className="text-xs text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+            >
+              Editar
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 const INPUT =
   'text-sm border border-gray-200 rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent w-full'
@@ -273,8 +338,12 @@ export default function CollaboratorDashboard() {
     loadData()
   }
 
+  const { profile: authProfile } = useAuth()
+
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 w-full">
+      {authProfile && <ProfileCard profile={authProfile} />}
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Minhas notas</h1>

@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import DOMPurify from 'dompurify'
 import { categoryColors } from '../../data/mock'
 import { formatDate, initials, avatarColor } from '../../lib/utils'
@@ -57,14 +57,20 @@ export default function NoteCard({ note, isFavorite, onToggleFavorite }) {
       )}
 
       <div className="flex items-center gap-2 pt-1 border-t border-gray-100 mt-auto">
-        <div
-          className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0 ${avatarColor(note.author.name)}`}
+        <Link
+          to={`/profile/${note.author.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
-          {initials(note.author.name)}
-        </div>
-        <span className="text-xs text-gray-600">
-          {note.author.name.split(' ')[0]}
-        </span>
+          <div
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0 ${avatarColor(note.author.name)}`}
+          >
+            {initials(note.author.name)}
+          </div>
+          <span className="text-xs text-gray-600">
+            {note.author.name.split(' ')[0]}
+          </span>
+        </Link>
         {note.author.role === 'admin' && (
           <span className="ml-auto text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
             admin
