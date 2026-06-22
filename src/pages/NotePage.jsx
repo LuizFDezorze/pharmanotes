@@ -4,11 +4,16 @@ import DOMPurify from 'dompurify'
 import { supabase } from '../lib/supabase'
 import { normalizeNote, formatDate, initials, avatarColor, stripHtml } from '../lib/utils'
 import { categoryColors } from '../data/mock'
+import { useAuth } from '../context/AuthContext'
+import { useFavorites } from '../hooks/useFavorites'
+import FavoriteButton from '../components/notes/FavoriteButton'
 import SEO from '../components/SEO'
 
 export default function NotePage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const { isFavorite, toggle } = useFavorites()
   const [note, setNote] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -72,9 +77,18 @@ export default function NotePage() {
           <span className="text-xs text-gray-400">{formatDate(note.date)}</span>
         </div>
 
-        <h1 className="text-xl font-semibold text-gray-900 leading-snug mb-5">
-          {note.title}
-        </h1>
+        <div className="flex items-start justify-between gap-3 mb-5">
+          <h1 className="text-xl font-semibold text-gray-900 leading-snug">
+            {note.title}
+          </h1>
+          {user && (
+            <FavoriteButton
+              active={isFavorite(id)}
+              onClick={() => toggle(id)}
+              className="shrink-0 mt-1"
+            />
+          )}
+        </div>
 
         {note.content.startsWith('<') ? (
           <div

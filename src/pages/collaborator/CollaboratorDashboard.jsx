@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { formatDate } from '../../lib/utils'
+import { useFavorites } from '../../hooks/useFavorites'
+import { formatDate, normalizeNote } from '../../lib/utils'
 import { categoryColors } from '../../data/mock'
+import NoteCard from '../../components/notes/NoteCard'
 import RichTextEditor from '../../components/editor/RichTextEditor'
 
 const INPUT =
@@ -185,7 +188,10 @@ function NoteEditor({ note, categories, onSaved, onCancel }) {
 
 export default function CollaboratorDashboard() {
   const { user } = useAuth()
+  const navigate = useNavigate()
+  const { isFavorite, toggle, favoriteIds } = useFavorites()
   const [notes, setNotes] = useState([])
+  const [favoriteNotes, setFavoriteNotes] = useState([])
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [showEditor, setShowEditor] = useState(false)
@@ -204,6 +210,27 @@ export default function CollaboratorDashboard() {
     setCategories(catsRes.data ?? [])
     setLoading(false)
   }
+
+  useEffect(() => {
+    if (favoriteIds.size === 0) {
+      setFavoriteNotes([])
+      return
+    }
+    supabase
+      .from('notes')
+      .select(`
+        id, title, content, status, created_at,
+        categories ( id, name ),
+        users ( id, name, role ),
+        note_tags ( tags ( id, name ) )
+      `)
+      .eq('status', 'published')
+      .in('id', [...favoriteIds])
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        setFavoriteNotes((data ?? []).map(normalizeNote))
+      })
+  }, [favoriteIds])
 
   useEffect(() => {
     loadData()
@@ -335,6 +362,29 @@ export default function CollaboratorDashboard() {
           })}
         </div>
       )}
+
+      <div className="mt-12">
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">Notas favoritas</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Notas que você salvou para consulta rápida.
+        </p>
+        {favoriteNotes.length === 0 ? (
+          <div className="text-center py-10 text-gray-400 text-sm">
+            Você ainda não favoritou nenhuma nota.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {favoriteNotes.map((note) => (
+              <NoteCard
+                key={note.id}
+                note={note}
+                isFavorite={isFavorite(note.id)}
+                onToggleFavorite={toggle}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </main>
   )
 }

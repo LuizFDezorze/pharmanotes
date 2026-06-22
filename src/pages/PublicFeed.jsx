@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 import { normalizeNote } from '../lib/utils'
+import { useAuth } from '../context/AuthContext'
+import { useFavorites } from '../hooks/useFavorites'
 import SEO from '../components/SEO'
 import NoteCard from '../components/notes/NoteCard'
 import CategoryFilter from '../components/notes/CategoryFilter'
@@ -8,6 +10,8 @@ import CategoryFilter from '../components/notes/CategoryFilter'
 const PAGE_SIZE = 12
 
 export default function PublicFeed() {
+  const { user } = useAuth()
+  const { isFavorite, toggle } = useFavorites()
   const [notes, setNotes] = useState([])
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
@@ -101,7 +105,12 @@ export default function PublicFeed() {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {paginated.map((note) => (
-              <NoteCard key={note.id} note={note} />
+              <NoteCard
+                key={note.id}
+                note={note}
+                isFavorite={user ? isFavorite(note.id) : false}
+                onToggleFavorite={user ? toggle : undefined}
+              />
             ))}
           </div>
 

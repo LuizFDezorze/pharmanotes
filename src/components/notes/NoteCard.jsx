@@ -2,8 +2,9 @@ import { useNavigate } from 'react-router-dom'
 import DOMPurify from 'dompurify'
 import { categoryColors } from '../../data/mock'
 import { formatDate, initials, avatarColor } from '../../lib/utils'
+import FavoriteButton from './FavoriteButton'
 
-export default function NoteCard({ note }) {
+export default function NoteCard({ note, isFavorite, onToggleFavorite }) {
   const navigate = useNavigate()
   const color = categoryColors[note.category] ?? categoryColors['Geral']
 
@@ -18,7 +19,12 @@ export default function NoteCard({ note }) {
         >
           {note.category}
         </span>
-        <span className="text-xs text-gray-400">{formatDate(note.date)}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-400">{formatDate(note.date)}</span>
+          {onToggleFavorite && (
+            <FavoriteButton active={isFavorite} onClick={() => onToggleFavorite(note.id)} />
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col gap-1.5 flex-1">
