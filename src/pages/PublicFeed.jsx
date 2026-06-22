@@ -8,6 +8,7 @@ import NoteCard from '../components/notes/NoteCard'
 import CategoryFilter from '../components/notes/CategoryFilter'
 
 const PAGE_SIZE = 12
+const DEFAULT_SUBTITLE = 'Encontre e registre o que você já sabe — mas pode não lembrar.'
 
 export default function PublicFeed() {
   const { user } = useAuth()
@@ -18,10 +19,11 @@ export default function PublicFeed() {
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [subtitle, setSubtitle] = useState(DEFAULT_SUBTITLE)
 
   useEffect(() => {
     async function load() {
-      const [notesRes, catsRes] = await Promise.all([
+      const [notesRes, catsRes, subtitleRes] = await Promise.all([
         supabase
           .from('notes')
           .select(`
@@ -33,9 +35,15 @@ export default function PublicFeed() {
           .eq('status', 'published')
           .order('created_at', { ascending: false }),
         supabase.from('categories').select('*').order('name'),
+        supabase
+          .from('site_settings')
+          .select('value')
+          .eq('key', 'feed_subtitle')
+          .single(),
       ])
       setNotes((notesRes.data ?? []).map(normalizeNote))
       setCategories(catsRes.data ?? [])
+      if (subtitleRes.data?.value) setSubtitle(subtitleRes.data.value)
       setLoading(false)
     }
     load()
@@ -70,7 +78,7 @@ export default function PublicFeed() {
           Notas Clínicas
         </h1>
         <p className="text-sm text-gray-500">
-          Referências farmacêuticas revisadas por especialistas.
+          {subtitle}
         </p>
       </div>
 

@@ -188,7 +188,8 @@ function AdminNoteEditor({ note, categories, authorId, onSaved, onCancel }) {
   )
 }
 
-function AboutTab() {
+function SiteTab() {
+  const [subtitle, setSubtitle] = useState('')
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -197,11 +198,13 @@ function AboutTab() {
   useEffect(() => {
     supabase
       .from('site_settings')
-      .select('value')
-      .eq('key', 'about_content')
-      .single()
+      .select('key, value')
+      .in('key', ['about_content', 'feed_subtitle'])
       .then(({ data }) => {
-        setContent(data?.value ?? '')
+        for (const row of data ?? []) {
+          if (row.key === 'about_content') setContent(row.value)
+          if (row.key === 'feed_subtitle') setSubtitle(row.value)
+        }
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -210,10 +213,10 @@ function AboutTab() {
   async function handleSave() {
     setSaving(true)
     setSaved(false)
-    await supabase
-      .from('site_settings')
-      .update({ value: content })
-      .eq('key', 'about_content')
+    await Promise.all([
+      supabase.from('site_settings').update({ value: content }).eq('key', 'about_content'),
+      supabase.from('site_settings').upsert({ key: 'feed_subtitle', value: subtitle }),
+    ])
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
@@ -228,11 +231,25 @@ function AboutTab() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <p className="text-sm text-gray-500">
-        Edite o conteúdo da página Sobre. Deixe vazio para usar o texto padrão.
-      </p>
-      <RichTextEditor content={content} onChange={setContent} />
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-900">Subtítulo do feed</label>
+        <p className="text-xs text-gray-400">Texto que aparece abaixo de "Notas Clínicas" na home.</p>
+        <input
+          type="text"
+          value={subtitle}
+          onChange={(e) => setSubtitle(e.target.value)}
+          placeholder="Ex: Encontre e registre o que você já sabe — mas pode não lembrar."
+          className={INPUT}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-900">Página Sobre</label>
+        <p className="text-xs text-gray-400">Deixe vazio para usar o texto padrão.</p>
+        <RichTextEditor content={content} onChange={setContent} />
+      </div>
+
       <div className="flex items-center gap-3">
         <button
           onClick={handleSave}
@@ -541,14 +558,14 @@ export default function AdminDashboard() {
         <TabButton active={tab === 'notes'} onClick={() => setTab('notes')}>
           Notas
         </TabButton>
-        <TabButton active={tab === 'about'} onClick={() => setTab('about')}>
-          Sobre
+        <TabButton active={tab === 'site'} onClick={() => setTab('site')}>
+          Site
         </TabButton>
       </div>
 
       {tab === 'users' && <UsersTab />}
       {tab === 'notes' && <NotesTab />}
-      {tab === 'about' && <AboutTab />}
+      {tab === 'site' && <SiteTab />}
     </main>
   )
 }

@@ -19,5 +19,7 @@ create policy "site_settings_admin_update" on site_settings
 create policy "site_settings_admin_insert" on site_settings
   for insert with check (is_admin());
 
--- Inserir valor inicial vazio (vai usar fallback no frontend)
-insert into site_settings (key, value) values ('about_content', '');
+-- Inserir valores iniciais vazios (frontend usa fallback quando vazio)
+insert into site_settings (key, value) values
+  ('about_content', ''),
+  ('feed_subtitle', '');
