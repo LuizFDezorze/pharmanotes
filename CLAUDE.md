@@ -39,7 +39,7 @@ src/
 │   └── utils.js                   # formatDate, initials, avatarColor, stripHtml, normalizeNote
 ├── data/mock.js                   # só categoryColors (não há mocks)
 └── pages/
-    ├── PublicFeed.jsx             # / — feed com filtro, busca, paginação
+    ├── PublicFeed.jsx             # / — feed com filtro, busca, paginação, subtítulo editável
     ├── NotePage.jsx               # /notes/:id
     ├── ProfilePage.jsx            # /profile/:id — perfil público do colaborador
     ├── AboutPage.jsx              # /about — conteúdo do banco com fallback estático
@@ -47,7 +47,7 @@ src/
     ├── RegisterPage.jsx           # /register
     ├── ForgotPasswordPage.jsx     # /forgot-password
     ├── ResetPasswordPage.jsx      # /reset-password
-    ├── admin/AdminDashboard.jsx   # /admin — gestão de notas, usuários e página Sobre
+    ├── admin/AdminDashboard.jsx   # /admin — tabs: Usuários, Notas, Site (subtítulo + Sobre)
     └── collaborator/
         └── CollaboratorDashboard.jsx  # /dashboard — minhas notas, bio, favoritos
 ```
@@ -60,7 +60,7 @@ src/
 - **tags** — id, name
 - **note_tags** — note_id, tag_id (junction)
 - **favorites** — user_id, note_id, created_at
-- **site_settings** — key (text PK), value (text) — conteúdo editável (ex: página Sobre)
+- **site_settings** — key (text PK), value (text) — conteúdo editável (chaves: about_content, feed_subtitle)
 
 ### RLS
 
@@ -77,7 +77,7 @@ src/
 - `schema_patch.sql` — patches incrementais
 - `schema_favorites.sql` — tabela favorites
 - `schema_profile.sql` — coluna bio + policies de perfil
-- `schema_site_settings.sql` — tabela site_settings (página Sobre editável)
+- `schema_site_settings.sql` — tabela site_settings (Sobre + subtítulo do feed)
 
 ## Segurança
 
