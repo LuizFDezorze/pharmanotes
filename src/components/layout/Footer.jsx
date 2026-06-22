@@ -1,7 +1,13 @@
+import { Link } from 'react-router-dom'
+
 export default function Footer() {
   return (
     <footer className="mt-auto border-t border-gray-100 py-4 px-4">
       <p className="text-center text-xs text-gray-400">
+        <Link to="/about" className="hover:text-gray-600 transition-colors">
+          Sobre
+        </Link>
+        {' · '}
         Built by{' '}
         <a
           href="https://github.com/LuizFDezorze"
