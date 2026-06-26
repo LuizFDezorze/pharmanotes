@@ -4,6 +4,7 @@ import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table
 import Image from '@tiptap/extension-image'
 import Superscript from '@tiptap/extension-superscript'
 import Subscript from '@tiptap/extension-subscript'
+import TextAlign from '@tiptap/extension-text-align'
 import { useRef, useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 
@@ -104,6 +105,10 @@ function Toolbar({ editor }) {
       table:        ctx.editor?.isActive('table'),
       superscript:  ctx.editor?.isActive('superscript'),
       subscript:    ctx.editor?.isActive('subscript'),
+      alignLeft:    ctx.editor?.isActive({ textAlign: 'left' }),
+      alignCenter:  ctx.editor?.isActive({ textAlign: 'center' }),
+      alignRight:   ctx.editor?.isActive({ textAlign: 'right' }),
+      alignJustify: ctx.editor?.isActive({ textAlign: 'justify' }),
     }),
   })
 
@@ -172,6 +177,37 @@ function Toolbar({ editor }) {
       <Divider />
 
       <ToolbarButton
+        onClick={() => editor.chain().focus().setTextAlign('left').run()}
+        active={state?.alignLeft}
+        title="Alinhar à esquerda"
+      >
+        Esq
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={() => editor.chain().focus().setTextAlign('center').run()}
+        active={state?.alignCenter}
+        title="Centralizar"
+      >
+        Cen
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={() => editor.chain().focus().setTextAlign('right').run()}
+        active={state?.alignRight}
+        title="Alinhar à direita"
+      >
+        Dir
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+        active={state?.alignJustify}
+        title="Justificado"
+      >
+        Jus
+      </ToolbarButton>
+
+      <Divider />
+
+      <ToolbarButton
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         active={state?.bulletList}
         title="Lista"
@@ -184,6 +220,20 @@ function Toolbar({ editor }) {
         title="Lista numerada"
       >
         1. Lista
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
+        active={false}
+        title="Aumentar recuo (dentro de listas)"
+      >
+        ⇥
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={() => editor.chain().focus().liftListItem('listItem').run()}
+        active={false}
+        title="Diminuir recuo (dentro de listas)"
+      >
+        ⇤
       </ToolbarButton>
 
       <Divider />
@@ -243,6 +293,7 @@ export default function RichTextEditor({ content, onChange }) {
       Image.configure({ inline: false, allowBase64: false }),
       Superscript,
       Subscript,
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
     ],
     content: content || '',
     onUpdate({ editor: e }) {
