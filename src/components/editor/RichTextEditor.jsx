@@ -2,6 +2,8 @@ import { useEditor, EditorContent, useEditorState } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
 import Image from '@tiptap/extension-image'
+import Superscript from '@tiptap/extension-superscript'
+import Subscript from '@tiptap/extension-subscript'
 import { useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 
@@ -41,9 +43,11 @@ function Toolbar({ editor }) {
       h1:          ctx.editor?.isActive('heading', { level: 1 }),
       h2:          ctx.editor?.isActive('heading', { level: 2 }),
       h3:          ctx.editor?.isActive('heading', { level: 3 }),
-      bulletList:  ctx.editor?.isActive('bulletList'),
-      orderedList: ctx.editor?.isActive('orderedList'),
-      table:       ctx.editor?.isActive('table'),
+      bulletList:   ctx.editor?.isActive('bulletList'),
+      orderedList:  ctx.editor?.isActive('orderedList'),
+      table:        ctx.editor?.isActive('table'),
+      superscript:  ctx.editor?.isActive('superscript'),
+      subscript:    ctx.editor?.isActive('subscript'),
     }),
   })
 
@@ -69,6 +73,20 @@ function Toolbar({ editor }) {
         title="Sublinhado (Ctrl+U)"
       >
         <span className="underline">U</span>
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={() => editor.chain().focus().toggleSuperscript().run()}
+        active={state?.superscript}
+        title="Sobrescrito"
+      >
+        X<sup>2</sup>
+      </ToolbarButton>
+      <ToolbarButton
+        onClick={() => editor.chain().focus().toggleSubscript().run()}
+        active={state?.subscript}
+        title="Subscrito"
+      >
+        X<sub>2</sub>
       </ToolbarButton>
 
       <Divider />
@@ -164,6 +182,8 @@ export default function RichTextEditor({ content, onChange }) {
       TableHeader,
       TableCell,
       Image.configure({ inline: false, allowBase64: false }),
+      Superscript,
+      Subscript,
     ],
     content: content || '',
     onUpdate({ editor: e }) {

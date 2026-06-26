@@ -13,6 +13,8 @@
     "@supabase/supabase-js": "^2.107.0",
     "@tailwindcss/typography": "^0.5.20",
     "@tiptap/extension-image": "^3.26.1",
+    "@tiptap/extension-subscript": "^3.27.1",
+    "@tiptap/extension-superscript": "^3.27.1",
     "@tiptap/extension-table": "^3.26.1",
     "@tiptap/extension-table-cell": "^3.26.1",
     "@tiptap/extension-table-header": "^3.26.1",
