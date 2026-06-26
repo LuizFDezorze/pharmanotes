@@ -4,7 +4,7 @@ import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table
 import Image from '@tiptap/extension-image'
 import Superscript from '@tiptap/extension-superscript'
 import Subscript from '@tiptap/extension-subscript'
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 
 // StarterKit v3 já inclui: Bold, Italic, Underline, Heading, BulletList,
@@ -32,6 +32,62 @@ function Divider() {
   return <span className="w-px h-5 bg-gray-300 mx-0.5 self-center shrink-0" />
 }
 
+const SYMBOLS = [
+  { group: 'Gregos',     chars: ['α','β','γ','δ','ε','λ','μ','π','σ','φ','Ω'] },
+  { group: 'Operadores', chars: ['±','×','÷','≤','≥','≠','≈'] },
+  { group: 'Setas',      chars: ['→','←','↑','↓','⇒','⇔'] },
+  { group: 'Outros',     chars: ['°','∞','√','∑','∫','½','¼','¾'] },
+]
+
+function SymbolPalette({ editor }) {
+  const [open, setOpen] = useState(false)
+  const wrapperRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onOutsideClick(e) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onOutsideClick)
+    return () => document.removeEventListener('mousedown', onOutsideClick)
+  }, [open])
+
+  function insert(char) {
+    editor.chain().focus().insertContent(char).run()
+    setOpen(false)
+  }
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <ToolbarButton onClick={() => setOpen(o => !o)} active={open} title="Símbolos matemáticos">
+        Ω
+      </ToolbarButton>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-gray-200 rounded-lg shadow-lg p-2 w-48">
+          {SYMBOLS.map(({ group, chars }) => (
+            <div key={group} className="mb-2 last:mb-0">
+              <p className="text-xs text-gray-400 mb-1">{group}</p>
+              <div className="flex flex-wrap gap-0.5">
+                {chars.map(char => (
+                  <button
+                    key={char}
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); insert(char) }}
+                    className="w-7 h-7 flex items-center justify-center text-sm rounded hover:bg-gray-100 transition-colors"
+                    title={char}
+                  >
+                    {char}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function Toolbar({ editor }) {
   // useEditorState garante re-render quando o estado do editor muda (TipTap v3)
   const state = useEditorState({
@@ -52,7 +108,7 @@ function Toolbar({ editor }) {
   })
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 bg-gray-50 border-b border-gray-200">
+    <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 bg-gray-50 border-b border-gray-200 rounded-t-lg">
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBold().run()}
         active={state?.bold}
@@ -166,6 +222,9 @@ function Toolbar({ editor }) {
           </ToolbarButton>
         </>
       )}
+
+      <Divider />
+      <SymbolPalette editor={editor} />
     </div>
   )
 }
@@ -217,7 +276,7 @@ export default function RichTextEditor({ content, onChange }) {
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+    <div className="border border-gray-200 rounded-lg bg-white">
       {editor ? (
         <Toolbar editor={editor} />
       ) : (
@@ -227,7 +286,7 @@ export default function RichTextEditor({ content, onChange }) {
       <EditorContent editor={editor} />
 
       {/* Botão de imagem fora da toolbar para evitar problemas de foco */}
-      <div className="flex items-center gap-2 px-3 py-1.5 border-t border-gray-100 bg-gray-50">
+      <div className="flex items-center gap-2 px-3 py-1.5 border-t border-gray-100 bg-gray-50 rounded-b-lg">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
