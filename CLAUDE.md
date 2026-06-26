@@ -7,7 +7,7 @@ Plataforma colaborativa de notas clínicas e referências farmacêuticas.
 - **Frontend:** React 19 + Vite + Tailwind CSS 4
 - **Backend/Auth/DB:** Supabase (PostgreSQL com RLS, Auth, Storage)
 - **Deploy:** Vercel (pharmanotes.vercel.app)
-- **Editor de texto:** TipTap v3 (rich text)
+- **Editor de texto:** TipTap v3 (rich text) — extensões: StarterKit, Table, Image, Underline, Superscript, Subscript, TextAlign
 - **Analytics:** Vercel Analytics (plano Hobby)
 
 ## Comandos
@@ -79,9 +79,27 @@ src/
 - `schema_profile.sql` — coluna bio + policies de perfil
 - `schema_site_settings.sql` — tabela site_settings (Sobre + subtítulo do feed)
 
+## Editor (RichTextEditor.jsx)
+
+Toolbar em grupos:
+
+```
+B  I  U  X²  X₂  |  H1  H2  H3  |  Esq  Cen  Dir  Jus  |  • Lista  1. Lista  ⇥  ⇤  |  Tabela  |  Ω
+```
+
+- **Formatação inline:** negrito, itálico, sublinhado, sobrescrito (`<sup>`), subscrito (`<sub>`)
+- **Alinhamento:** esquerda/centro/direita/justificado via `TextAlign` (`style="text-align"` — preservado pelo DOMPurify por padrão)
+- **Listas:** bullet, numerada, recuo ⇥/⇤ (`sinkListItem`/`liftListItem`)
+- **Tabela:** inserir, +coluna, +linha, excluir
+- **Paleta Ω:** 31 símbolos Unicode em 4 grupos (Gregos, Operadores, Setas, Outros) — inseridos como texto puro, zero impacto no DOMPurify
+- **Imagem:** upload para Supabase Storage (`note-images/`), URL pública inserida no editor
+
+> Não usar `overflow-hidden` no wrapper do editor — o painel Ω usa `position: absolute` e seria cortado.
+
 ## Segurança
 
 - HTML das notas sanitizado com **DOMPurify** antes de renderizar (previne XSS)
+- `style` está no allowlist padrão do DOMPurify — `text-align` funciona sem configuração extra
 - Chaves Supabase via variáveis de ambiente (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`)
 - `.env` no `.gitignore`
 
