@@ -5,6 +5,7 @@ import Image from '@tiptap/extension-image'
 import Superscript from '@tiptap/extension-superscript'
 import Subscript from '@tiptap/extension-subscript'
 import TextAlign from '@tiptap/extension-text-align'
+import { TextStyle, FontFamily, FontSize } from '@tiptap/extension-text-style'
 import { useRef, useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 
@@ -89,6 +90,71 @@ function SymbolPalette({ editor }) {
   )
 }
 
+const FONT_FAMILIES = [
+  { label: 'Padrão',     value: '' },
+  { label: 'Sans-serif', value: 'Arial, sans-serif' },
+  { label: 'Serif',      value: 'Georgia, serif' },
+  { label: 'Mono',       value: 'Courier New, monospace' },
+  { label: 'Sistema',    value: 'system-ui, sans-serif' },
+]
+
+const FONT_SIZES = ['10px','12px','14px','16px','18px','20px','24px','28px','32px','36px','48px']
+
+function FontSelect({ editor }) {
+  const current = useEditorState({
+    editor,
+    selector: ctx => ctx.editor?.getAttributes('textStyle')?.fontFamily ?? '',
+  })
+
+  function onChange(e) {
+    const val = e.target.value
+    if (!val) editor.chain().focus().unsetFontFamily().run()
+    else editor.chain().focus().setFontFamily(val).run()
+  }
+
+  return (
+    <select
+      value={current ?? ''}
+      onChange={onChange}
+      onMouseDown={e => e.stopPropagation()}
+      title="Família de fonte"
+      className="h-7 text-xs text-gray-700 bg-white border border-gray-200 rounded px-1 cursor-pointer hover:border-gray-400 focus:outline-none"
+    >
+      {FONT_FAMILIES.map(f => (
+        <option key={f.value} value={f.value}>{f.label}</option>
+      ))}
+    </select>
+  )
+}
+
+function SizeSelect({ editor }) {
+  const current = useEditorState({
+    editor,
+    selector: ctx => ctx.editor?.getAttributes('textStyle')?.fontSize ?? '',
+  })
+
+  function onChange(e) {
+    const val = e.target.value
+    if (!val) editor.chain().focus().unsetFontSize().run()
+    else editor.chain().focus().setFontSize(val).run()
+  }
+
+  return (
+    <select
+      value={current ?? ''}
+      onChange={onChange}
+      onMouseDown={e => e.stopPropagation()}
+      title="Tamanho da fonte"
+      className="h-7 text-xs text-gray-700 bg-white border border-gray-200 rounded px-1 cursor-pointer hover:border-gray-400 focus:outline-none w-16"
+    >
+      <option value="">Tam.</option>
+      {FONT_SIZES.map(s => (
+        <option key={s} value={s}>{s.replace('px', '')}</option>
+      ))}
+    </select>
+  )
+}
+
 function Toolbar({ editor }) {
   // useEditorState garante re-render quando o estado do editor muda (TipTap v3)
   const state = useEditorState({
@@ -114,6 +180,9 @@ function Toolbar({ editor }) {
 
   return (
     <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 bg-gray-50 border-b border-gray-200 rounded-t-lg">
+      <FontSelect editor={editor} />
+      <SizeSelect editor={editor} />
+      <Divider />
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBold().run()}
         active={state?.bold}
@@ -286,7 +355,7 @@ export default function RichTextEditor({ content, onChange }) {
     immediatelyRender: true,
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
-      Table.configure({ resizable: false }),
+      Table.configure({ resizable: true }),
       TableRow,
       TableHeader,
       TableCell,
@@ -294,6 +363,9 @@ export default function RichTextEditor({ content, onChange }) {
       Superscript,
       Subscript,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      TextStyle,
+      FontFamily,
+      FontSize,
     ],
     content: content || '',
     onUpdate({ editor: e }) {
