@@ -8,6 +8,17 @@ export default function NoteCard({ note, isFavorite, onToggleFavorite }) {
   const navigate = useNavigate()
   const color = categoryColors[note.category] ?? categoryColors['Geral']
 
+  function handleContentClick(e) {
+    const anchor = e.target.closest('a')
+    if (!anchor) return
+    e.stopPropagation()
+    const href = anchor.getAttribute('href')
+    if (href?.startsWith('/notes/')) {
+      e.preventDefault()
+      navigate(href)
+    }
+  }
+
   return (
     <article
       onClick={() => navigate(`/notes/${note.id}`)}
@@ -34,6 +45,7 @@ export default function NoteCard({ note, isFavorite, onToggleFavorite }) {
         {note.content.startsWith('<') ? (
           <div
             className="text-sm text-gray-500 leading-relaxed line-clamp-3 [&_*]:!m-0 [&_*]:!p-0"
+            onClick={handleContentClick}
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note.content) }}
           />
         ) : (

@@ -53,6 +53,16 @@ export default function NotePage() {
 
   const color = categoryColors[note.category] ?? categoryColors['Geral']
 
+  function handleContentClick(e) {
+    const anchor = e.target.closest('a')
+    if (!anchor) return
+    const href = anchor.getAttribute('href')
+    if (href?.startsWith('/notes/')) {
+      e.preventDefault()
+      navigate(href)
+    }
+  }
+
   return (
     <main className="max-w-2xl mx-auto px-4 sm:px-6 py-10 w-full">
       <SEO
@@ -93,6 +103,7 @@ export default function NotePage() {
         {note.content.startsWith('<') ? (
           <div
             className="prose prose-sm max-w-none text-gray-600 mb-6"
+            onClick={handleContentClick}
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note.content) }}
           />
         ) : (

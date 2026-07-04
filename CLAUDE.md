@@ -84,7 +84,7 @@ src/
 Toolbar em grupos:
 
 ```
-[Fonte▼] [Tam▼]  |  B  I  U  X²  X₂  |  H1  H2  H3  |  Esq  Cen  Dir  Jus  |  • Lista  1. Lista  ⇥  ⇤  |  Tabela  |  Ω
+[Fonte▼] [Tam▼]  |  B  I  U  X²  X₂  |  H1  H2  H3  |  Esq  Cen  Dir  Jus  |  • Lista  1. Lista  ⇥  ⇤  |  Tabela  |  🔗  |  Ω
 ```
 
 - **Fonte:** família (Padrão, Sans-serif, Serif, Mono, Sistema) e tamanho (10–48px) via dropdowns; usam `TextStyle` + `FontFamily` + `FontSize` do pacote `@tiptap/extension-text-style` (named exports, sem default)
@@ -92,6 +92,7 @@ Toolbar em grupos:
 - **Alinhamento:** esquerda/centro/direita/justificado via `TextAlign` (`style="text-align"` — preservado pelo DOMPurify por padrão)
 - **Listas:** bullet, numerada, recuo ⇥/⇤ (`sinkListItem`/`liftListItem`)
 - **Tabela:** inserir, +coluna, +linha, excluir; redimensionamento de colunas por arrasto (`resizable: true`) com handle `.column-resize-handle` estilizado em `index.css`
+- **Link para nota (🔗):** `@tiptap/extension-link` com `openOnClick: false`, `autolink: false`, `linkOnPaste: false`, `protocols: ['http', 'https']` — o único jeito de criar um link é pelo seletor `NoteLinkPicker`, que busca notas **publicadas** (`status = 'published'`) por título e insere `href="/notes/{id}"`; não existe campo de URL livre, então o autor nunca digita um `href` diretamente. `NotePage.jsx` e `NoteCard.jsx` interceptam cliques em `<a href="/notes/...">` dentro do HTML renderizado e navegam via `react-router` (`navigate()`) em vez de recarregar a página; em `NoteCard.jsx` o clique também dá `stopPropagation` para não disparar a navegação do card inteiro.
 - **Paleta Ω:** 31 símbolos Unicode em 4 grupos (Gregos, Operadores, Setas, Outros) — inseridos como texto puro, zero impacto no DOMPurify
 - **Imagem:** upload para Supabase Storage (`note-images/`), URL pública inserida no editor
 
@@ -99,8 +100,9 @@ Toolbar em grupos:
 
 ## Segurança
 
-- HTML das notas sanitizado com **DOMPurify** antes de renderizar (previne XSS)
+- HTML das notas sanitizado com **DOMPurify** antes de renderizar (previne XSS) — é a barreira final mesmo que conteúdo colado no editor traga atributos inesperados (ex: DOMPurify já remove `href="javascript:..."` por padrão)
 - `style` está no allowlist padrão do DOMPurify — `text-align` funciona sem configuração extra
+- Links entre notas nunca aceitam `href` livre digitado pelo autor (ver seção Editor acima) — reduz a superfície de ataque a "qual nota publicada escolher", não "qual URL/protocolo injetar"
 - Chaves Supabase via variáveis de ambiente (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`)
 - `.env` no `.gitignore`
 

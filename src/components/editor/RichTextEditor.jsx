@@ -2,6 +2,7 @@ import { useEditor, EditorContent, useEditorState } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
 import Image from '@tiptap/extension-image'
+import Link from '@tiptap/extension-link'
 import Superscript from '@tiptap/extension-superscript'
 import Subscript from '@tiptap/extension-subscript'
 import TextAlign from '@tiptap/extension-text-align'
@@ -90,6 +91,106 @@ function SymbolPalette({ editor }) {
   )
 }
 
+function NoteLinkPicker({ editor }) {
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  const wrapperRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onOutsideClick(e) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onOutsideClick)
+    return () => document.removeEventListener('mousedown', onOutsideClick)
+  }, [open])
+
+  useEffect(() => {
+    if (!open || query.trim().length < 2) {
+      setResults([])
+      return
+    }
+    setLoading(true)
+    const timeout = setTimeout(() => {
+      supabase
+        .from('notes')
+        .select('id, title')
+        .eq('status', 'published')
+        .ilike('title', `%${query.trim()}%`)
+        .order('title')
+        .limit(8)
+        .then(({ data }) => {
+          setResults(data ?? [])
+          setLoading(false)
+        })
+    }, 300)
+    return () => clearTimeout(timeout)
+  }, [open, query])
+
+  function selectNote(note) {
+    const href = `/notes/${note.id}`
+    const { empty } = editor.state.selection
+    if (empty) {
+      editor
+        .chain()
+        .focus()
+        .insertContent({
+          type: 'text',
+          text: note.title,
+          marks: [{ type: 'link', attrs: { href } }],
+        })
+        .run()
+    } else {
+      editor.chain().focus().extendMarkRange('link').setLink({ href }).run()
+    }
+    setOpen(false)
+    setQuery('')
+    setResults([])
+  }
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <ToolbarButton onClick={() => setOpen(o => !o)} active={open} title="Link para outra nota">
+        🔗
+      </ToolbarButton>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-gray-200 rounded-lg shadow-lg p-2 w-64">
+          <input
+            type="text"
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onMouseDown={(e) => e.stopPropagation()}
+            placeholder="Buscar nota pelo título..."
+            className="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-400"
+          />
+          <div className="mt-1 max-h-48 overflow-y-auto">
+            {loading && (
+              <p className="text-xs text-gray-400 px-1 py-1.5">Buscando...</p>
+            )}
+            {!loading && query.trim().length >= 2 && results.length === 0 && (
+              <p className="text-xs text-gray-400 px-1 py-1.5">Nenhuma nota encontrada.</p>
+            )}
+            {results.map((note) => (
+              <button
+                key={note.id}
+                type="button"
+                onMouseDown={(e) => { e.preventDefault(); selectNote(note) }}
+                className="w-full text-left text-sm px-2 py-1.5 rounded hover:bg-gray-100 transition-colors truncate"
+                title={note.title}
+              >
+                {note.title}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const FONT_FAMILIES = [
   { label: 'Padrão',     value: '' },
   { label: 'Sans-serif', value: 'Arial, sans-serif' },
@@ -171,6 +272,7 @@ function Toolbar({ editor }) {
       table:        ctx.editor?.isActive('table'),
       superscript:  ctx.editor?.isActive('superscript'),
       subscript:    ctx.editor?.isActive('subscript'),
+      link:         ctx.editor?.isActive('link'),
       alignLeft:    ctx.editor?.isActive({ textAlign: 'left' }),
       alignCenter:  ctx.editor?.isActive({ textAlign: 'center' }),
       alignRight:   ctx.editor?.isActive({ textAlign: 'right' }),
@@ -343,6 +445,18 @@ function Toolbar({ editor }) {
       )}
 
       <Divider />
+      <NoteLinkPicker editor={editor} />
+      {state?.link && (
+        <ToolbarButton
+          onClick={() => editor.chain().focus().unsetLink().run()}
+          active={false}
+          title="Remover link"
+        >
+          ✕🔗
+        </ToolbarButton>
+      )}
+
+      <Divider />
       <SymbolPalette editor={editor} />
     </div>
   )
@@ -360,6 +474,13 @@ export default function RichTextEditor({ content, onChange }) {
       TableHeader,
       TableCell,
       Image.configure({ inline: false, allowBase64: false }),
+      Link.configure({
+        openOnClick: false,
+        autolink: false,
+        linkOnPaste: false,
+        protocols: ['http', 'https'],
+        HTMLAttributes: { rel: 'noopener' },
+      }),
       Superscript,
       Subscript,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
