@@ -6,9 +6,14 @@ Plataforma colaborativa de notas clínicas e referências farmacêuticas.
 
 - **Frontend:** React 19 + Vite + Tailwind CSS 4
 - **Backend/Auth/DB:** Supabase (PostgreSQL com RLS, Auth, Storage)
-- **Deploy:** Vercel (pharmanotes.vercel.app)
+- **Deploy:** Vercel (pharmanotes.vercel.app) — deploy automático a cada push em `master`
 - **Editor de texto:** TipTap v3 (rich text) — extensões: StarterKit, Table (resizable), Image, Underline, Superscript, Subscript, TextAlign, TextStyle, FontFamily, FontSize
 - **Analytics:** Vercel Analytics (plano Hobby)
+
+## Git
+
+- Remote `origin` configurado via **SSH** (`git@github.com:LuizFDezorze/pharmanotes.git`), chave já cadastrada na conta do GitHub — `git push`/`git pull` não pedem autenticação
+- Sempre `git fetch` antes de assumir que o local está "à frente" do origin — status ahead/behind depende do último fetch, não é garantia de que o remoto não mudou
 
 ## Comandos
 
