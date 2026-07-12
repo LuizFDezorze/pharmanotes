@@ -25,10 +25,82 @@
   background: #f9fafb;
   font-weight: 600;
 }
-.tiptap img {
+.tiptap-image-wrapper {
+  position: relative;
+  display: inline-block;
   max-width: 100%;
+  vertical-align: top;
+  line-height: 0;
+}
+.tiptap-image-wrapper.is-center {
+  display: block;
+  margin: 0.75rem auto;
+}
+.tiptap-image-wrapper.is-float-left {
+  float: left;
+  margin: 0.25rem 1.25rem 0.75rem 0;
+}
+.tiptap-image-wrapper.is-float-right {
+  float: right;
+  margin: 0.25rem 0 0.75rem 1.25rem;
+}
+.tiptap-image-wrapper img {
+  max-width: 100%;
+  display: block;
   border-radius: 0.5rem;
-  margin: 0.5rem 0;
+}
+.tiptap-image-wrapper.is-selected img {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+.tiptap-image-handle {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 14px;
+  height: 14px;
+  background: #93c5fd;
+  border: 2px solid white;
+  border-radius: 9999px;
+  cursor: nwse-resize;
+  display: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.tiptap-image-wrapper.is-selected .tiptap-image-handle,
+.tiptap-image-wrapper.is-resizing .tiptap-image-handle {
+  display: block;
+}
+.tiptap-image-toolbar {
+  position: absolute;
+  top: -2.1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  gap: 2px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  padding: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  z-index: 20;
+  line-height: normal;
+}
+.tiptap-image-wrapper.is-selected .tiptap-image-toolbar {
+  display: flex;
+}
+.tiptap-image-toolbar button {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  background: transparent;
+}
+.tiptap-image-toolbar button:hover {
+  background: #f3f4f6;
+}
+.tiptap-image-toolbar button.active {
+  background: #dbeafe;
 }
 .tiptap p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);

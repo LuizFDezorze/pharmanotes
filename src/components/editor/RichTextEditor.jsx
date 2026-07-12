@@ -1,7 +1,6 @@
 import { useEditor, EditorContent, useEditorState } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
-import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Superscript from '@tiptap/extension-superscript'
 import Subscript from '@tiptap/extension-subscript'
@@ -9,6 +8,7 @@ import TextAlign from '@tiptap/extension-text-align'
 import { TextStyle, FontFamily, FontSize } from '@tiptap/extension-text-style'
 import { useRef, useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
+import ResizableImage from './ResizableImage'
 
 // StarterKit v3 já inclui: Bold, Italic, Underline, Heading, BulletList,
 // OrderedList, Strike, Code, CodeBlock, Blockquote, HardBreak, HorizontalRule.
@@ -462,6 +462,25 @@ function Toolbar({ editor }) {
   )
 }
 
+async function uploadImageFile(file) {
+  const ext = file.name?.split('.').pop() || 'png'
+  const path = `note-images/${Date.now()}.${ext}`
+  const { error } = await supabase.storage
+    .from('note-images')
+    .upload(path, file, { upsert: false })
+
+  if (error) return null
+
+  const { data } = supabase.storage.from('note-images').getPublicUrl(path)
+  return data.publicUrl
+}
+
+function insertImageAtSelection(view, url) {
+  const { schema, tr } = view.state
+  const node = schema.nodes.image.create({ src: url })
+  view.dispatch(tr.replaceSelectionWith(node))
+}
+
 export default function RichTextEditor({ content, onChange }) {
   const fileInputRef = useRef(null)
 
@@ -473,7 +492,7 @@ export default function RichTextEditor({ content, onChange }) {
       TableRow,
       TableHeader,
       TableCell,
-      Image.configure({ inline: false, allowBase64: false }),
+      ResizableImage.configure({ inline: false, allowBase64: false }),
       Link.configure({
         openOnClick: false,
         autolink: false,
@@ -496,6 +515,22 @@ export default function RichTextEditor({ content, onChange }) {
       attributes: {
         class: 'prose prose-sm max-w-none min-h-[180px] px-4 py-3 focus:outline-none',
       },
+      handlePaste(view, event) {
+        const item = Array.from(event.clipboardData?.items || []).find((i) =>
+          i.type.startsWith('image/')
+        )
+        if (!item) return false
+
+        const file = item.getAsFile()
+        if (!file) return false
+
+        event.preventDefault()
+        uploadImageFile(file).then((url) => {
+          if (url) insertImageAtSelection(view, url)
+          else alert('Erro ao enviar imagem colada.')
+        })
+        return true
+      },
     },
   })
 
@@ -503,19 +538,13 @@ export default function RichTextEditor({ content, onChange }) {
     const file = e.target.files?.[0]
     if (!file || !editor) return
 
-    const ext = file.name.split('.').pop()
-    const path = `note-images/${Date.now()}.${ext}`
-    const { error } = await supabase.storage
-      .from('note-images')
-      .upload(path, file, { upsert: false })
-
-    if (error) {
+    const url = await uploadImageFile(file)
+    if (!url) {
       alert('Erro ao enviar imagem.')
       return
     }
 
-    const { data } = supabase.storage.from('note-images').getPublicUrl(path)
-    editor.chain().focus().setImage({ src: data.publicUrl }).run()
+    editor.chain().focus().setImage({ src: url }).run()
     e.target.value = ''
   }
 

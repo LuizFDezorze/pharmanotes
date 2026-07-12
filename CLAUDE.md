@@ -7,7 +7,7 @@ Plataforma colaborativa de notas clínicas e referências farmacêuticas.
 - **Frontend:** React 19 + Vite + Tailwind CSS 4
 - **Backend/Auth/DB:** Supabase (PostgreSQL com RLS, Auth, Storage)
 - **Deploy:** Vercel (pharmanotes.vercel.app) — deploy automático a cada push em `master`
-- **Editor de texto:** TipTap v3 (rich text) — extensões: StarterKit, Table (resizable), Image, Underline, Superscript, Subscript, TextAlign, TextStyle, FontFamily, FontSize
+- **Editor de texto:** TipTap v3 (rich text) — extensões: StarterKit, Table (resizable), ResizableImage (custom), Underline, Superscript, Subscript, TextAlign, TextStyle, FontFamily, FontSize
 - **Analytics:** Vercel Analytics (plano Hobby)
 
 ## Git
@@ -30,6 +30,7 @@ src/
 ├── components/
 │   ├── SEO.jsx                    # meta tags dinâmicas (react-helmet-async)
 │   ├── editor/RichTextEditor.jsx  # editor TipTap
+│   ├── editor/ResizableImage.js   # extensão Image custom: resize por arrasto + alinhamento/wrap
 │   ├── layout/Header.jsx
 │   ├── layout/Footer.jsx
 │   ├── layout/ProtectedRoute.jsx  # guarda rotas por role/status
@@ -99,7 +100,10 @@ Toolbar em grupos:
 - **Tabela:** inserir, +coluna, +linha, excluir; redimensionamento de colunas por arrasto (`resizable: true`) com handle `.column-resize-handle` estilizado em `index.css`
 - **Link para nota (🔗):** `@tiptap/extension-link` com `openOnClick: false`, `autolink: false`, `linkOnPaste: false`, `protocols: ['http', 'https']` — o único jeito de criar um link é pelo seletor `NoteLinkPicker`, que busca notas **publicadas** (`status = 'published'`) por título e insere `href="/notes/{id}"`; não existe campo de URL livre, então o autor nunca digita um `href` diretamente. `NotePage.jsx` e `NoteCard.jsx` interceptam cliques em `<a href="/notes/...">` dentro do HTML renderizado e navegam via `react-router` (`navigate()`) em vez de recarregar a página; em `NoteCard.jsx` o clique também dá `stopPropagation` para não disparar a navegação do card inteiro.
 - **Paleta Ω:** 31 símbolos Unicode em 4 grupos (Gregos, Operadores, Setas, Outros) — inseridos como texto puro, zero impacto no DOMPurify
-- **Imagem:** upload para Supabase Storage (`note-images/`), URL pública inserida no editor
+- **Imagem:** upload para Supabase Storage (`note-images/`), URL pública inserida no editor via botão "+ Imagem" ou colando (Ctrl+V) um screenshot da área de transferência (`handlePaste` em `editorProps`, detecta `clipboardData.items` do tipo `image/*` e faz upload automático)
+  - **Redimensionar e alinhar:** extensão `ResizableImage` (`ResizableImage.js`, estende `@tiptap/extension-image`) adiciona atributos `width` e `align` (`left`/`right`/`null`=centro) persistidos como `style` inline (`width`, `float`, `margin`) no `<img>` — funciona tanto no editor quanto na nota renderizada, sem precisar de config extra no DOMPurify (mesma lógica do `text-align`)
+  - NodeView customizado (`addNodeView`) desenha uma alça de resize (`.tiptap-image-handle`, arrasto muda a largura) e uma mini-toolbar flutuante (`.tiptap-image-toolbar`, botões ⬅ ▬ ➡) quando a imagem está selecionada — CSS em `index.css` (`.tiptap-image-wrapper` e afins); a serialização (`renderHTML`) gera um `<img>` "puro" (sem wrapper/handle) para o HTML salvo
+  - Alinhar à esquerda/direita usa `float`, então o texto digitado/existente flui ao lado da imagem; centro é `display: block; margin: auto` (sem wrap)
 
 > Não usar `overflow-hidden` no wrapper do editor — o painel Ω usa `position: absolute` e seria cortado.
 
