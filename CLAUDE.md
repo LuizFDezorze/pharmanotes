@@ -15,6 +15,11 @@ Plataforma colaborativa de notas clínicas e referências farmacêuticas.
 - Remote `origin` configurado via **SSH** (`git@github.com:LuizFDezorze/pharmanotes.git`), chave já cadastrada na conta do GitHub — `git push`/`git pull` não pedem autenticação
 - Sempre `git fetch` antes de assumir que o local está "à frente" do origin — status ahead/behind depende do último fetch, não é garantia de que o remoto não mudou
 
+## CI (GitHub Actions)
+
+- `.github/workflows/keep-alive.yml` — ping semanal (segunda 09:00 UTC, também disparável via `workflow_dispatch`) na REST API do Supabase (`/rest/v1/notes?select=id&limit=1`) para evitar que o projeto seja pausado por inatividade no tier free
+- Depende dos repository secrets `SUPABASE_URL` (Project URL, sem `/rest/v1/`) e `SUPABASE_ANON_KEY` (chave anon/public) — cadastrados em Settings → Secrets and variables → Actions; independentes das env vars `VITE_*` da Vercel
+
 ## Comandos
 
 ```bash
